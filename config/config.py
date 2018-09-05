@@ -8,3 +8,4 @@ DB = {
 }
 
 DEBUG = credentials.DEBUG
+HOLIDAYAPI_KEY = credentials.HOLIDAYAPI_KEY

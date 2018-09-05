@@ -9,6 +9,8 @@ app.config.from_object(config)
 
 def create_app():
     from views.blog import blog
+    from views.custom import custom
     app.blueprint(blog, url_prefix='/blog')
+    app.blueprint(custom, url_prefix='/custom')
 
     return app
