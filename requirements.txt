@@ -2,3 +2,4 @@ asyncio==3.4.3
 asyncpg==0.17.0
 aiohttp==3.4.4
 sanic==0.7.0
+SQLAlchemy==1.2.11

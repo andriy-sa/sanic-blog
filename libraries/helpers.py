@@ -1,5 +1,12 @@
+from datetime import datetime
+
+
+def parse_value(value):
+    if isinstance(value, datetime):
+        value = str(value)
+    return value
+
+
 def jsonify(records):
-    """
-    Parse asyncpg record response into JSON format
-    """
-    return [dict(r.items()) for r in records]
+    return [{key: parse_value(value) for key, value in
+             zip(r.keys(), r.values())} for r in records]
