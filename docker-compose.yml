@@ -11,6 +11,7 @@ services:
       - "8002:8000"
     links:
       - postgres:postgreshost
+      - redis:redishost
     depends_on:
       - postgres
   postgres:
@@ -25,6 +26,15 @@ services:
      driver: none
    volumes:
      - /sa_postgre/:/var/www/html
+  redis:
+    image: redis
+    container_name: sanic-redis
+    volumes:
+      - ~/.sd-redis:/data
+    logging:
+      driver: none
+    ports:
+      - "6379:6379"
   adminer:
    image: asergey/adminer:latest
    container_name: sanic-adminer

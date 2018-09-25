@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from app import app
 from libraries import holidayapi
 from sanic import Blueprint
