@@ -2,22 +2,33 @@ from core.database import DB
 from libraries.helpers import jsonify
 from libraries.validation import Validation
 from models.article import Article
+from models.comment import Comment
 from sanic import Blueprint
 from sanic.response import json
-from sqlalchemy import desc, or_
+from sqlalchemy import case, desc, func, join, or_
+from sqlalchemy.sql import text
 
 blog = Blueprint('blog')
 
 
 @blog.route("/")
 async def articles_list(request):
+    # str_subquery = text("(select count(*) from comments where comments.article_id = articles.id) as comments_count")
+    # stmt = DB.select([func.count(Comment.id)]).where(Comment.article_id == Article.id).label('comments_count')
+
     q = request.args.get('q')
     page = int(request.args.get('page')) if request.args.get('page') and request.args.get('page').isdigit() else 1
     limit = int(request.args.get('limit')) if request.args.get('limit') and request.args.get('limit').isdigit() else 10
     offset = limit * (page - 1)
 
-    results = DB.select([Article]).where(Article.is_published == True)
+    results = DB.select([Article, case([(Article.is_published == True, func.count(Comment.id))], else_=None).label(
+        'comments_count')]) \
+        .select_from(join(Article, Comment, Comment.article_id == Article.id, isouter=True)) \
+        .group_by(Article.id)
+    # .where(Article.is_published == True)\
 
+    print(results)
+    print("++++++++++++++++++++")
     if q:
         results = results.where(or_(Article.title.ilike("%{}%".format(q)), Article.description.ilike("%{}%".format(q))))
 

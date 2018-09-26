@@ -38,12 +38,15 @@ async def chat_test(request):
 
 @sio.on('connect')
 async def test_connect(sid, environ):
-    pass
+    users.append(sid)
+    print(users)
+    #print(environ)
 
 
 @sio.on('on_connected')
 async def on_connected(sid, message):
-    users.append(sid)
+    print('connected')
+
 
 
 def disconnect_user(sid):

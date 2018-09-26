@@ -8,12 +8,9 @@
         $(document).ready(function () {
             var socket = io({
                 path: "/ws",
-                transportOptions: {
-                    polling: {
-                        extraHeaders: {
-                            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjU5ZjcwNDBmN2Y1NzU0MDAyZDkxYjZjZiIsImV4cCI6MTUzNTgwMDcxNn0.bSJpU81NeUtXEjFbgBm4M7yOQFl0-oN-3FHcaQiMbZU'
-                        }
-                    }
+                transports: ['websocket', 'polling'],
+                query: {
+                    token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjU5ZjcwNDBmN2Y1NzU0MDAyZDkxYjZjZiIsImV4cCI6MTUzNTgwMDcxNn0.bSJpU81NeUtXEjFbgBm4M7yOQFl0-oN-3FHcaQiMbZU"
                 }
             });
             console.log(socket);
