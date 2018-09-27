@@ -1,40 +1,34 @@
-from core.database import DB
-from libraries.helpers import jsonify
+from app import db
+from libraries.helpers import jsonify, model_dict
 from libraries.validation import Validation
 from models.article import Article
 from models.comment import Comment
 from sanic import Blueprint
 from sanic.response import json
 from sqlalchemy import case, desc, func, join, or_
-from sqlalchemy.sql import text
 
 blog = Blueprint('blog')
 
 
 @blog.route("/")
 async def articles_list(request):
-    # str_subquery = text("(select count(*) from comments where comments.article_id = articles.id) as comments_count")
-    # stmt = DB.select([func.count(Comment.id)]).where(Comment.article_id == Article.id).label('comments_count')
-
     q = request.args.get('q')
     page = int(request.args.get('page')) if request.args.get('page') and request.args.get('page').isdigit() else 1
     limit = int(request.args.get('limit')) if request.args.get('limit') and request.args.get('limit').isdigit() else 10
     offset = limit * (page - 1)
 
-    results = DB.select([Article, case([(Article.is_published == True, func.count(Comment.id))], else_=None).label(
-        'comments_count')]) \
+    articles = db.select([Article,
+                          case([(Article.is_published == True, func.count(Comment.id))], else_=None).label(
+                              'comments_count')]) \
         .select_from(join(Article, Comment, Comment.article_id == Article.id, isouter=True)) \
         .group_by(Article.id)
-    # .where(Article.is_published == True)\
 
-    print(results)
-    print("++++++++++++++++++++")
     if q:
-        results = results.where(or_(Article.title.ilike("%{}%".format(q)), Article.description.ilike("%{}%".format(q))))
+        articles = articles.where(
+            or_(Article.title.ilike("%{}%".format(q)), Article.description.ilike("%{}%".format(q))))
 
-    results = await results.order_by(desc(Article.created_at)).limit(limit).offset(offset).execute()
-
-    return json({'posts': jsonify(results)})
+    articles = await articles.order_by(desc(Article.created_at)).limit(limit).offset(offset).gino.all()
+    return json({'posts': jsonify(articles)})
 
 
 @blog.route("/create", methods=['POST'])
@@ -47,27 +41,27 @@ async def article_create(request):
     if not validator.is_valid(request.json or {}, rules):
         return json({'errors': validator.errors}, 400)
 
-    article = await DB.insert(Article.__table__).values({
-        'title': request.json.get('title'),
-        'description': request.json.get('description'),
-        'is_published': request.json.get('is_published')
-    }).execute()
+    article = await Article.create(**{'title': request.json.get('title'),
+                                      'description': request.json.get('description'),
+                                      'is_published': request.json.get('is_published')
+                                      })
 
-    return json(jsonify(article)[0], 201)
+    return json(model_dict(article), 201)
 
 
 @blog.route("/<id:int>")
 async def article_detail(request, id):
-    article = await DB.select([Article]).where(Article.is_published == True).where(Article.id == id).execute()
-    if not len(article):
+    article = await Article.query.where(Article.id == id).gino.first()
+    if not article:
         return json({'message': 'Not Found'}, 404)
-    return json(jsonify(article)[0])
+
+    return json(model_dict(article))
 
 
 @blog.route("/update/<id:int>", methods=['PUT'])
 async def article_update(request, id):
-    article = await DB.select([Article]).where(Article.id == id).execute()
-    if not len(article):
+    article = await Article.query.where(Article.id == id).gino.first()
+    if not article:
         return json({'message': 'Not Found'}, 404)
 
     validator = Validation()
@@ -78,21 +72,21 @@ async def article_update(request, id):
     if not validator.is_valid(request.json or {}, rules):
         return json({'errors': validator.errors}, 400)
 
-    article = await DB.update(Article.__table__).where(Article.id == id).values({
+    await article.update(**{
         'title': request.json.get('title'),
         'description': request.json.get('description'),
         'is_published': request.json.get('is_published')
-    }).execute()
+    }).apply()
 
-    return json(jsonify(article)[0])
+    return json(model_dict(article))
 
 
 @blog.route("/delete/<id:int>", methods=['DELETE'])
 async def article_delete(request, id):
-    article = await DB.select([Article]).where(Article.id == id).execute()
-    if not len(article):
+    article = await Article.query.where(Article.id == id).gino.first()
+    if not article:
         return json({'message': 'Not Found'}, 404)
 
-    await DB.delete(Article.__table__).where(Article.id == id).execute()
+    await article.delete()
 
     return json(None, 204)

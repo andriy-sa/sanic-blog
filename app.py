@@ -1,13 +1,14 @@
 import socketio
 from config import config
-from core.init_db import db_bp
+from gino.ext.sanic import Gino
 from sanic import Sanic
 
 sio = socketio.AsyncServer(async_mode='sanic')
 app = Sanic()
 sio.attach(app, socketio_path='/ws')
-app.blueprint(db_bp)
 app.config.from_object(config)
+db = Gino()
+db.init_app(app)
 
 
 def create_app():

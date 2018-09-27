@@ -1,9 +1,9 @@
+from app import db
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.ext.declarative import declarative_base as Base
 from sqlalchemy.sql import func
 
 
-class Comment(Base()):
+class Comment(db.Model):
     __tablename__ = 'comments'
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(255), nullable=False, primary_key=True)

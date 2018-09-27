@@ -19,9 +19,6 @@ async def redis_listener():
 
     while await receiver.wait_message():
         sender, msg = await receiver.get()
-        print("+++++++++++++++++++++++++++")
-        print(msg)
-        print("+++++++++++++++++++++++++++")
         for sid in users:
             await sio.emit('notification:message', {'data': str(msg)}, room=sid)
 
@@ -38,15 +35,12 @@ async def chat_test(request):
 
 @sio.on('connect')
 async def test_connect(sid, environ):
-    users.append(sid)
-    print(users)
-    #print(environ)
+    pass
 
 
 @sio.on('on_connected')
 async def on_connected(sid, message):
-    print('connected')
-
+    users.append(sid)
 
 
 def disconnect_user(sid):

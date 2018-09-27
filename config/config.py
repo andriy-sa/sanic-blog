@@ -2,13 +2,11 @@ import os
 
 from . import credentials
 
-DB = {
-    'host': credentials.DB_HOST,
-    'user': credentials.DB_USER,
-    'password': credentials.DB_PASSWORD,
-    'database': credentials.DB_NAME
-}
-
+DB_HOST = credentials.DB_HOST
+DB_USER = credentials.DB_USER
+DB_PASSWORD = credentials.DB_PASSWORD
+DB_DATABASE = credentials.DB_NAME
+DB_ECHO = True
 REDIS = {
     'address': (credentials.REDIS_HOST, credentials.REDIS_PORT),
     # 'db': 0,
