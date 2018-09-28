@@ -1,6 +1,9 @@
 asyncio==3.4.3
-aiohttp==3.4.4
 aioredis==1.1.0
+aioelasticsearch==0.5.2
+Click==7.0
 gino==0.7.5
+elasticsearch-dsl==6.2.1
 python-socketio==2.0.0
+psycopg2==2.7.5
 sanic==0.7.0

@@ -16,3 +16,5 @@ REDIS = {
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = credentials.DEBUG
 HOLIDAYAPI_KEY = credentials.HOLIDAYAPI_KEY
+
+ELASTICSEARCH_HOST = credentials.ELASTICSEARCH_HOST

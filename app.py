@@ -1,4 +1,5 @@
 import socketio
+from aioelasticsearch import Elasticsearch
 from config import config
 from gino.ext.sanic import Gino
 from sanic import Sanic
@@ -9,6 +10,8 @@ sio.attach(app, socketio_path='/ws')
 app.config.from_object(config)
 db = Gino()
 db.init_app(app)
+
+es = Elasticsearch([config.ELASTICSEARCH_HOST])
 
 
 def create_app():

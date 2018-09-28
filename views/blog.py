@@ -1,4 +1,7 @@
+from aioelasticsearch import Elasticsearch
 from app import db
+from config import config
+from elastic_docs.article import ArticleDoc
 from libraries.helpers import jsonify, model_dict
 from libraries.validation import Validation
 from models.article import Article
@@ -29,6 +32,23 @@ async def articles_list(request):
 
     articles = await articles.order_by(desc(Article.created_at)).limit(limit).offset(offset).gino.all()
     return json({'posts': jsonify(articles)})
+
+
+@blog.route("/autocomplete")
+async def articles_list(request):
+    q = request.args.get('q')
+    limit = int(request.args.get('limit')) if request.args.get('limit') and request.args.get('limit').isdigit() else 10
+
+    query = ArticleDoc.search().filter('term', is_published=True)
+    if q:
+        query = query.query('match_phrase', title={'query': q, 'analyzer': 'standard'})
+
+    query = query.sort('_score', '-created_at')[0:limit].to_dict()
+
+    async with Elasticsearch([config.ELASTICSEARCH_HOST]) as es:
+        result = await es.search(index=ArticleDoc._index._name, body=query)
+
+    return json(result)
 
 
 @blog.route("/create", methods=['POST'])
